@@ -14,18 +14,45 @@ The goal was to predict the latency for web server requests under various config
 
 ## 🛠️ Solution Overview  
 
-### 1. **Data Preprocessing**  
-- **Handling Missing Values**: Missing values were imputed using domain-specific techniques.  
-- **Feature Engineering**: Generated new features, including interaction terms and aggregations, to capture critical patterns.  
-- **Encoding Categorical Variables**: Categorical features were encoded using target encoding for better predictive power.  
+### Key Steps:
+1. **Data Preprocessing**:
+   - Feature engineering:
+     - Timestamp decomposition into year, month, day, hour, minute, and second.
+     - Log transformations for CPU and RAM usage.
+     - Interaction features between CPU and RAM.
+   - Conversion of RAM limits to megabytes.
+   - CPU type decomposition into brand, series, and model.
+   - One-hot encoding for categorical variables.
+   - Alignment of training and testing datasets.
 
-### 2. **Modeling**  
-I experimented with various machine learning models:  
-- **XGBoost**  
-- **CatBoost**  
-- **Random Forest**  
-- **Gradient Boosting**  
+2. **Exploratory Data Analysis**:
+   - Correlation analysis to identify relationships between features and the target variable.
 
-After tuning hyperparameters using **Optuna**, I achieved the best results with **CatBoostRegressor**.  
+3. **Feature Preparation**:
+   - Defined numerical and categorical preprocessing pipelines using `StandardScaler`, `PolynomialFeatures`, and `OneHotEncoder`.
+   - Created a unified `ColumnTransformer` for feature transformation.
 
-**Key Hyperparameters for CatBoost**:  
+4. **Modeling**:
+   - Hyperparameter tuning for `CatBoostRegressor` using `Optuna`.
+   - Leveraged an ensemble of models:
+     - **CatBoostRegressor** (tuned with the best parameters found using Optuna)
+     - **XGBRegressor**
+     - **RandomForestRegressor**
+     - **GradientBoostingRegressor**
+   - Created a `VotingRegressor` to combine predictions from multiple models.
+
+5. **Validation**:
+   - Used `TimeSeriesSplit` and `KFold` cross-validation to evaluate model performance.
+   - Calculated mean R² scores across multiple folds.
+
+6. **Prediction**:
+   - Trained the final pipeline on the entire training data.
+   - Predicted latencies on the testing data.
+   - Prepared a submission file for Kaggle.
+
+## Dependencies
+
+Install the required Python packages using pip:
+
+```bash
+pip install pandas numpy scikit-learn matplotlib seaborn optuna catboost xgboost pycaret
